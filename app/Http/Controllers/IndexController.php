@@ -9,17 +9,35 @@ use Illuminate\Http\Request;
 
 class IndexController extends Controller
 {
+    //Token gerado no Sirius
     private $api_token = "eyJ0eXAiOiJKV1QiLCJhbGciOiJSUzI1NiJ9.eyJhdWQiOiIxMSIsImp0aSI6Ijc1YTY1ZTRjOGRjNzZmOTM0ODkyMjRiN2Y1MDRjYjNhNjI3ZDkxNGY4ZTkyZTdkMTFhN2U4NjI0Zjk4N2YzMjY5NTczYWU3NjQ2MGE0ZDc1IiwiaWF0IjoxNjI2MjEwNDE0LjUwMzY5MywibmJmIjoxNjI2MjEwNDE0LjUwMzY5NiwiZXhwIjoyNTcyODk1MjE0LjQwMTIsInN1YiI6IjI2Iiwic2NvcGVzIjpbInNhbGUiXX0.aHNP3BKTzJQxG1iKP3v4TX2qlllSJfF3rGZmQsd3hm-sL2h7DdAK_6gilYbgqr6NhK6L9I7484ah2xIr17j2DtC5Jnhr_hhfXh9wIjLF0QMrMOCEWZHEtNPpYuRhLEP2XEJWmUmDTOo3iub1JfM6dls-qTeLIjlkRmbgwbtA0I_1Tma_H_8qgvvbS6WwlSrMMDcTFqJKW0lbN4nvGbcVcT7jIaPc7TEwLdxy3ZYvb7MFqCVtBdMDeGE7GBQJonpL_uyqwKQhaASsPwX8GNthLtbaj-Q-0HdaxLCuMkTEi_reewmvVFuGETGXk46JVv786RzfONVqFjGLJ6kYTUc1mk5PuzaXPFcvajs_RFQaCGGoY3l_YAg9bsvuKSLSQh6C7en8qjOf-_st_jFEDxdjSnON9XvTsmRwu3fLmnhgqidTyV0Bd-DeqR9xhcs8COEgJ2dEx8BAYZa50gAmx6HaFd1Prh5KVtVwXb9bwxzLa1-cW8SsKkjzc0_O7QFzEuiWPtt46UV19GXNxZBgdc7XYwPlF1hLUYbl5BfBvNurOaMY3CFVZ07yXfbkuOOssfN56yamQssgjAqxISx1Y9-hv6ZgXAt9aGlPvlb6-YrLN7y37gVY83nu08JsWOgit3o1Tu0_u9Ir6aHGv4wUbToByLbSWUjQ4HG9e5GyKdSxzXw";
     private $installments_interest_free=0;
 
     public function payment(Request $request){
         try{
-            $data = 
-            [
+            $customer = (object)[
+                "first_name"=> "Teste",
+                "last_name"=> "da Silva",
+                "name"=> "Teste da Silva",
+                "email"=> "teste@hotmail.com",
+                "document_type"=> "cpf",
+                "document_number"=> "15419563037",
+                "telephone"=> "24999999999",
+                "address"=> [
+                    "street"=> "Avenida General Afonseca",
+                    "number"=> "1475",
+                    "complement"=> "",
+                    "district"=> "Manejo",
+                    "city"=> "Resende",
+                    "state"=> "RJ",
+                    "country"=> "Brasil",
+                    "postal_code"=> "27520174"
+                ]
+            ];                
+            
+            $data = [
                 "payment_method"=> $request->payment_method,
-                "amount"=> $request->amount,
-                "installments"=>$request->installments,                
-                "installments_interest_free"=> $this->installments_interest_free,
+                "amount"=> $request->amount*100,  //últimas duas casas é parte decimal              
                 "currency"=> "BRL",
                 "invoice_description"=> "Descrição da fatura",
 
@@ -30,25 +48,7 @@ class IndexController extends Controller
                     "expiration_date"=> $request->card_expiration_date
                 ],
 
-                "customer"=> [
-                    "first_name"=> "Teste",
-                    "last_name"=> "da Silva",
-                    "name"=> "Teste da Silva",
-                    "email"=> "teste@hotmail.com",
-                    "document_type"=> "cpf",
-                    "document_number"=> "15419563037",
-                    "telephone"=> "24999999999",
-                    "address"=> [
-                        "street"=> "Avenida General Afonseca",
-                        "number"=> "1475",
-                        "complement"=> "",
-                        "district"=> "Manejo",
-                        "city"=> "Resende",
-                        "state"=> "RJ",
-                        "country"=> "Brasil",
-                        "postal_code"=> "27520174"
-                    ]
-                ],
+                "customer"=> $customer,
 
                 "shipping_amount"=> "000",
 
@@ -56,12 +56,25 @@ class IndexController extends Controller
                     [
                         "id"=> "123", //meu id
                         "name"=> "Produto de Teste",
-                        "price"=> 100,
+                        "price"=> 10000, //últimas duas casas é parte decimal
                         "quantity"=> 1,
                         "product_type"=> "physical_goods"
                     ]
                 ]
             ];
+            
+            switch($request->payment_method){
+                case 'credit_card': 
+                    $data["installments"] = $request->installments;
+                    $data["installments_interest_free"] = $this->installments_interest_free;
+                    $data['attempt_reference'] = $request->attempt_reference;
+                break;
+                case 'boleto':
+                    $data['billet_due_days'] = 3;
+                break;
+                case 'pix':
+                break;
+            }
 
             $cloudfox = new Cloudfox($this->api_token);             
             return response()->json($cloudfox->getPayment($data));

@@ -37,9 +37,7 @@ document.getElementById("checkout-btn").addEventListener("click", function() {
             }, 500);
         });
              
-    }, 500);
-
-    
+    }, 500);    
 });
   
 function updatePrice() {
@@ -92,11 +90,11 @@ function getInstallments(){
         },           
         data:formData,            
         error: function (response) {              
-            console.log(response.responseJSON);            
+                       
             $("#alertPaymentCC").html(`<div class="alert alert-danger">${response.responseJSON.message}</div>`);
         },            
         success: function (response) {                
-            console.log(response);
+            
             $('#installments').html('');
             response.forEach(element => {
                 $('#installments').append(`<option value="${element.amount}">${element.amount} x de R$ ${element.value}</option>`);            
@@ -105,8 +103,9 @@ function getInstallments(){
     }); 
 }
 
-$( "#form-credit-card" ).submit(function( event ) {
-    event.preventDefault();
+$( "#form-credit-card" ).submit(function( event ) {   
+    event.preventDefault(); 
+    //essencial para executar o antifraude
     if (window.dftp) {
         dftp.profile(sendPaymentCardData);
     } else {
@@ -115,10 +114,28 @@ $( "#form-credit-card" ).submit(function( event ) {
 });
 
 function sendPaymentCardData(){
-    var formData = new FormData($("#form-credit-card")[0]);
-    formData.append('attempt_reference', CloudfoxAntifraud.options.attemptReference);
+    postPayment("#form-credit-card",'credit_card',".payment-credit-card","#alertPaymentCC");
+}
+
+$( "#form-boleto" ).submit(function( event ) {
+    event.preventDefault();
+    postPayment("#form-boleto","boleto",".payment-boleto","#alertPaymentBo");        
+});
+
+$( "#form-pix" ).submit(function( event ) {
+    event.preventDefault();
+    postPayment("#form-pix","pix",".payment-pix","#alertPaymentPix");    
+});
+
+function postPayment(divForm,payment_method,divLoading,divAlert){
+    divLoading = `${divLoading} .box-content`;
+    var formData = new FormData($(divForm)[0]);
+    if(payment_method=='credit_card'){
+        formData.append('attempt_reference', CloudfoxAntifraud.getAttemptReference());
+        console.log(CloudfoxAntifraud.getAttemptReference());
+    }
     formData.append('amount', total_cart);
-    formData.append('payment_method', 'credit_card');
+    formData.append('payment_method', payment_method);
     
     $.ajax({
         method: "POST",
@@ -133,23 +150,49 @@ function sendPaymentCardData(){
         crossDomain:false,         
         data: formData,            
         beforeSend: function () {                
-            $(".payment-credit-card").loading({message: '...',start:true});
+            $(divLoading).loading({message: '...',start:true});
             $('.btn-finish').removeAttr('disabled');
         },
         error: function (response) {                                    
-            $(".payment-credit-card").loading('stop');
-            $('.btn-finish').removeAttr('disabled');
+            $(divLoading).loading('stop');
+            $('.btn-finish').removeAttr('disabled'); 
+            console.log(response);                       
+            $(divAlert).html(`<div class="alert alert-danger">${response.responseJSON.message}</div>`);
         },            
-        success: function (response) {                
-            $(".payment-credit-card").loading('stop');
-            $('.btn-finish').removeAttr('disabled');
-            if(response.status=='error'){
-                $("#alertPaymentCC").html(`<div class="alert alert-danger">${response.message}</div>`);
+        success: function (data) {                
+            $(divLoading).loading('stop');
+            $('.btn-finish').removeAttr('disabled');             
+            console.log(data.response);
+            if(data.status=='error'){
+                $(divAlert).html(`<div class="alert alert-danger">${data.message}</div>`);
             }else{
-                $("#alertPaymentCC").html(`<div class="alert alert-success">${response.message}</div>`);
+                $('.btn-finish').hide();
+                switch(payment_method){
+                    case 'pix':
+                        $(divAlert).html(`<div class="alert alert-success">Qrcode gerado com sucesso!</div>`);
+                        $('#qrcode_img').html(`<img src="${data.response.pix.qrcode_image}" class="rounded" alt="...">`);
+                        $('#qrcode').val(data.response.pix.qrcode);
+                        $('#qrcode').removeAttr('disabled');
+                    break;
+                    case 'boleto':
+                        $(divAlert).html(`<div class="alert alert-success">Boleto gerado com sucesso!</div>`);
+                        setTimeout(() => {
+                            $(divLoading).fadeOut(500);
+                            $(".payment-confirmation").show(500).fadeIn();
+                            $('#message_confirmation').html(`<h3>Linha digitável boleto</h3><h1>${data.response.boleto.digitable_line}</h1><br/>
+                            <a href="${data.response.boleto.link}" class="btn btn-success" target="blank">Baixar</a>` );
+                        }, 1000);
+                    break;
+                    case 'credit_card':
+                        $(divAlert).html(`<div class="alert alert-success">Pagamento com cartão realizado com sucesso!</div>`);
+                        setTimeout(() => {
+                            $(divLoading).fadeOut(500);
+                            $(".payment-confirmation").show(500).fadeIn();
+                            $('#message_confirmation').html("<h1>Pagamento com cartão de crédito realizado com sucesso!</h1>" );
+                        }, 1000);
+                    break;
+                }                              
             }
-            console.log(response);
         }
     }); 
 }
-

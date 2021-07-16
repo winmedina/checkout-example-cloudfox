@@ -5,8 +5,7 @@
                     <div id="alertPaymentCC"></div>
                 </div>
                 <div class="box-content">
-                    <form id="form-credit-card">
-                        <input type="hidden" name="payment_method" value="credit-card">
+                    <form id="form-credit-card">                        
                         @csrf
                         <div class="row">
                             <div class="col-md-12 col-lg-8 py-3 px-5">
@@ -14,7 +13,7 @@
                                     <div class="col-md-10">
                                         <div class="form-group">
                                             <label for="">Número do cartão de crédito</label>
-                                            <input type="text" class="form-control" name="card_number" value="4012001037141112" required>
+                                            <input type="text" class="form-control" name="card_number" value="5155901222280001" required>
                                         </div>
                                     </div>
                                     <div class="col-md-2"></div>
@@ -53,7 +52,7 @@
                                     Voltar para tela anterior
                                 </a>
                             </div>
-                            <div class="col-md-12 col-lg-4 px-0">
+                            <div class="col-md-12 col-lg-4 pl-0">
                                 <div class="summary">
                                     <h3>Resumo</h3>
                                     <div class="summary-item">
@@ -65,7 +64,7 @@
                                         </p>
                                     </div>
                                     <div class="d-grid gap-2">
-                                        <button class="btn btn-primary btn-finish-cc">Finalizar Compra</button>
+                                        <button class="btn btn-primary btn-finish">Finalizar Compra</button>
                                     </div>
                                 </div>
                             </div>

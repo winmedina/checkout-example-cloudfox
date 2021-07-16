@@ -8,10 +8,10 @@
                         <div class="col-md-12 col-lg-8 py-3 px-5">
                             <h4>Selecione uma forma de pagamento</h4>
                             <br/>
-                            <ul class="options-list ui-card">
-                                <li class="options-list__item" id="item-credit-card" payment_method="credit_card">
+                            <ul class="payment_list ui-card">
+                                <li class="payment_list_item" id="item-credit-card" payment_method="credit_card">
                                     <input type="radio" class="u-hide" id="new_card_row" name="payment_method" value="credit_card">
-                                    <label class="options-list__label " for="new_card_row">
+                                    <label class="payment_list_label " for="new_card_row">
                                         <div class="group-media-object">
                                             <div>
                                                 <div class="icon-wrapper">
@@ -43,9 +43,9 @@
                                         </div>
                                     </label>
                                 </li>
-                                <li class="options-list__item" id="item-boleto" payment_method="boleto">
+                                <li class="payment_list_item" id="item-boleto" payment_method="boleto">
                                     <input type="radio" class="u-hide" id="boleto" name="payment_method" value="boleto">
-                                    <label class="options-list__label" for="boleto">
+                                    <label class="payment_list_label" for="boleto">
                                         <div class="group-media-object">
                                             <div>
                                                 <div class="icon-wrapper">
@@ -74,9 +74,9 @@
                                         </div>
                                     </label>
                                 </li>
-                                <li class="options-list__item" id="item-pix" payment_method="pix">
+                                <li class="payment_list_item" id="item-pix" payment_method="pix">
                                     <input type="radio" class="u-hide" id="pix" name="payment_method" value="pix">
-                                    <label class="options-list__label" for="pix">
+                                    <label class="payment_list_label" for="pix">
                                         <div class="group-media-object">
                                             <div>
                                                 <div class="icon-wrapper">

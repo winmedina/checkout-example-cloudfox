@@ -64,34 +64,33 @@ footer{
     width: 100%;
 }
 
-.payment-method, .payment-credit-card, .payment-boleto, .payment-pix{
+.payment-method, .payment-credit-card, .payment-boleto, .payment-pix, .payment-confirmation{
     display:none;
 }
-
 
 .cloudfox .ui-card, div.cloudfox div.group-payment-method-row-with-cvv .group-row {
     background-color: #fff;
     border-radius: 6px;  
 }
 
-.options-list {
+.payment_list {
     margin: 0 0 1em;
     position: relative;
 }
-.options-list {
+.payment_list {
     padding: 0;
 }
 
 .cloudfox .ui-card>:first-child, div.cloudfox div.group-payment-method-row-with-cvv .group-row>:first-child {
 margin-top: 0;
 }
-.options-list__item {
+.payment_list_item {
 height: 4.625em;
 background: #fff;
 border-bottom: .0625em solid #eee;
 }
 
-.options-list__label {
+.payment_list_label {
 position: relative;
 display: block;
 width: 100%;
@@ -105,10 +104,10 @@ align-items: center;
 height: 100%;
 }
 
-.options-list .icon-wrapper {
+.payment_list .icon-wrapper {
     margin-right: 1.25em;
 }
-.options-list .icon-wrapper {
+.payment_list .icon-wrapper {
 width: 3.5em;
 height: 3.5em;
 margin-right: 1em;
@@ -127,7 +126,7 @@ display: flex;
 justify-content: center;
 align-items: center;
 }
-.options-list .icon-wrapper svg {
+.payment_list .icon-wrapper svg {
 max-width: 2.25em;
 max-height: 2.25em;
 }
@@ -150,7 +149,7 @@ font-weight: normal !important;
 text-transform: none !important;
 }
 
-.options-list__item:not(.disabled,.with-action-text) .options-list__label:before {
+.payment_list_item:not(.disabled,.with-action-text) .payment_list_label:before {
     background: inherit;
     border-bottom: .109375em solid #ff4e05;
     border-right: .109375em solid #ff4e05;
@@ -167,6 +166,6 @@ text-transform: none !important;
     width: .3125em;
 }
 
-li.options-list__item:hover{
+li.payment_list_item:hover{
     background-color: #fcf6f4;
 }

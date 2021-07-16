@@ -28,6 +28,8 @@
             @include('partials.payment_boleto')
             <!-- pix -->
             @include('partials.payment_pix')
+
+            @include('partials.payment_confirmation')
         </main>
     </div>
     <footer class="p-4 bg-white">
