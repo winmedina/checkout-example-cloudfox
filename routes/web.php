@@ -16,8 +16,6 @@ use Illuminate\Support\Facades\Route;
 Route::get('/', function () {
     return view('master');
 });
-Route::post('/create-preference',function(){
-    return ['id'=>1];
-});
+
 Route::post('/payment','\App\Http\Controllers\IndexController@payment');
 Route::post('/installments','\App\Http\Controllers\IndexController@installments');

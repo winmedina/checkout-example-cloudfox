@@ -2,8 +2,12 @@
 
 namespace App\Http\Controllers;
 
-use App\Services\CloudfoxException;
-use App\Services\Cloudfox;
+use App\Exceptions\CloudfoxException;
+use App\Services\Cloudfox\CloudfoxApi;
+use App\Services\Cloudfox\Address;
+use App\Services\Cloudfox\Cloudfox;
+use App\Services\Cloudfox\Customer;
+use App\Services\Cloudfox\Product;
 use Exception;
 use Illuminate\Http\Request;
 
@@ -15,69 +19,46 @@ class IndexController extends Controller
 
     public function payment(Request $request){
         try{
-            $customer = (object)[
-                "first_name"=> "Teste",
-                "last_name"=> "da Silva",
-                "name"=> "Teste da Silva",
-                "email"=> "teste@hotmail.com",
-                "document_type"=> "cpf",
-                "document_number"=> "15419563037",
-                "telephone"=> "24999999999",
-                "address"=> [
-                    "street"=> "Avenida General Afonseca",
-                    "number"=> "1475",
-                    "complement"=> "",
-                    "district"=> "Manejo",
-                    "city"=> "Resende",
-                    "state"=> "RJ",
-                    "country"=> "Brasil",
-                    "postal_code"=> "27520174"
-                ]
-            ];                
-            
-            $data = [
-                "payment_method"=> $request->payment_method,
-                "amount"=> $request->amount*100,  //últimas duas casas é parte decimal              
-                "currency"=> "BRL",
-                "invoice_description"=> "Descrição da fatura",
+            $cloudfox = new Cloudfox();
+            $cloudfox->payment_method = $request->payment_method;
+            $cloudfox->amount = $request->amount*100;  //últimas duas casas é parte decimal              
+            $cloudfox->currency = "BRL";
+            $cloudfox->invoice_description =  "Descrição da fatura";
 
-                "card"=> [
-                    "holder_name"=> $request->card_name,
-                    "number"=> $request->card_number,
-                    "cvv"=> $request->card_cvv,
-                    "expiration_date"=> $request->card_expiration_date
-                ],
-
-                "customer"=> $customer,
-
-                "shipping_amount"=> "000",
-
-                "items"=> [
-                    [
-                        "id"=> "123", //meu id
-                        "name"=> "Produto de Teste",
-                        "price"=> 10000, //últimas duas casas é parte decimal
-                        "quantity"=> 1,
-                        "product_type"=> "physical_goods"
-                    ]
-                ]
-            ];
-            
             switch($request->payment_method){
                 case 'credit_card': 
-                    $data["installments"] = $request->installments;
-                    $data["installments_interest_free"] = $this->installments_interest_free;
-                    $data['attempt_reference'] = $request->attempt_reference;
+                    $cloudfox->installments = $request->installments;
+                    $cloudfox->installments_interest_free = $this->installments_interest_free; 
+                    $cloudfox->attempt_reference = $request->attempt_reference; //obrigatorio
+
+                    $cloudfox->card = [
+                        "holder_name"=> $request->card_name,
+                        "number"=> $request->card_number,
+                        "cvv"=> $request->card_cvv,
+                        "expiration_date"=> $request->card_expiration_date
+                    ];
                 break;
                 case 'boleto':
-                    $data['billet_due_days'] = 3;
-                break;
-                case 'pix':
+                    $cloudfox->billet_due_days = 3;
                 break;
             }
 
-            $cloudfox = new Cloudfox($this->api_token);             
-            return response()->json($cloudfox->getPayment($data));
+            $cloudfox->customer = $this->getCustomer();             
+            
+            $cloudfox->shipping_amount ="000"; //últimas duas casas é parte decimal
+
+            $product = new Product();
+            $product->id = "123"; //meu id de produto
+            $product->name =  "Produto de Teste"; //titulo do produto
+            $product->price =  10000; //últimas duas casas é parte decimal
+            $product->quantity =  1;
+            $product->product_type =  "physical_goods";
+
+            $cloudfox->addProduct($product);           
+
+            $cloudfoxApi = new CloudfoxApi($this->api_token);  
+            
+            return response()->json($cloudfoxApi->sendPayment($cloudfox));
 
         }catch(CloudfoxException $e){
             return response()->json(['status'=>'error','message'=>$e->getMessage(),'errors'=>$e->getErrors()],400);        
@@ -93,10 +74,35 @@ class IndexController extends Controller
         ];
 
         try{
-            $cloudfox = new Cloudfox($this->api_token);            
+            $cloudfox = new CloudfoxApi($this->api_token);            
             return $cloudfox->getInstallments($data);
         }catch(CloudfoxException $e){
             return response()->json(['status'=>'error','message'=>$e->getMessage(),'errors'=>$e->getErrors()],400);        
         }
+    }
+
+    public function getCustomer()
+    {
+        $customer = new Customer();
+        $customer->first_name = "Teste";
+        $customer->last_name = "da Silva";
+        $customer->name = "Teste da Silva";
+        $customer->email = "teste@hotmail.com";
+        $customer->document_type = "cpf";
+        $customer->document_number = "15419563037";
+        $customer->telephone = "24999999999";
+
+        $address = new Address();        
+        $address->street = "Avenida General Afonseca";
+        $address->number = "1475";
+        $address->complement = "";
+        $address->district = "Manejo";
+        $address->city = "Resende";
+        $address->state = "RJ";
+        $address->country = "Brasil";
+        $address->postal_code = "27520174";
+        
+        $customer->address = $address; 
+        return $customer;
     }
 }

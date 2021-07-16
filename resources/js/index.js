@@ -1,6 +1,5 @@
 var total_cart = 0;
 
-//Handle call to backend and generate preference.
 document.getElementById("checkout-btn").addEventListener("click", function() {
     $('#checkout-btn').attr("disabled", true);
     
@@ -128,7 +127,7 @@ $( "#form-pix" ).submit(function( event ) {
 });
 
 function postPayment(divForm,payment_method,divLoading,divAlert){
-    divLoading = `${divLoading} .box-content`;
+    divLoading2 = `${divLoading} .box-content`;
     var formData = new FormData($(divForm)[0]);
     if(payment_method=='credit_card'){
         formData.append('attempt_reference', CloudfoxAntifraud.getAttemptReference());
@@ -150,17 +149,17 @@ function postPayment(divForm,payment_method,divLoading,divAlert){
         crossDomain:false,         
         data: formData,            
         beforeSend: function () {                
-            $(divLoading).loading({message: '...',start:true});
+            $(divLoading2).loading({message: '...',start:true});
             $('.btn-finish').removeAttr('disabled');
         },
         error: function (response) {                                    
-            $(divLoading).loading('stop');
+            $(divLoading2).loading('stop');
             $('.btn-finish').removeAttr('disabled'); 
             console.log(response);                       
             $(divAlert).html(`<div class="alert alert-danger">${response.responseJSON.message}</div>`);
         },            
         success: function (data) {                
-            $(divLoading).loading('stop');
+            $(divLoading2).loading('stop');
             $('.btn-finish').removeAttr('disabled');             
             console.log(data.response);
             if(data.status=='error'){

@@ -1,12 +1,12 @@
 <?php
-namespace App\Services;
+namespace App\Services\Cloudfox;
 
-use App\Services\CloudfoxException;
+use App\Exceptions\CloudfoxException;
 use Cache;
 use Exception;
 use Illuminate\Support\Facades\Log;
 
-class Cloudfox
+class CloudfoxApi
 {
     private $apiToken = "";
     private $apiUrl = "http://dev.checkout.net/api";
@@ -27,7 +27,7 @@ class Cloudfox
         throw new CloudfoxException("Ops! algo deu errado na Api Cloudfox", $response['status'], null, json_decode($response['result']));        
     }
 
-    public function getPayment($data){
+    public function sendPayment($data){
         $response = $this->requestGnAuth('payment', $data);        
         if($response['status']==200){
             return json_decode($response['result']);
